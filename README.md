@@ -9,15 +9,15 @@ I developed a dual-path ingestion strategy to handle different data velocities:
 
 2. Transformation: The Metadata-Driven Silver Layer
 The core innovation of my pipeline is the One Big Table (OBT) approach in the Silver layer, designed for decentralized domain-specific modeling.
-- Jinja2 SQL Templating: To make the code modular and future-proof, I implemented Jinja2 templating. Instead of hardcoding complex multi-table joins, I defined a configuration file; my Jinja template then dynamically renders the SQL query for the join, allowing new tables to be added without touching the core processing logic.
-- Streaming Joins and Watermarking: In the Silver layer, I combined the streaming ride data with bulk loads using an append flow. To handle late-arriving data and manage state in memory, I applied Watermarking (e.g., a 3-minute delay) on the booking timestamps.
+- Jinja2 SQL Templating: To make the code modular and future-proof, I implemented Jinja2 templating. Instead of hardcoding complex multi-table joins, I defined a configuration file, and my Jinja template dynamically renders the SQL query for the join, allowing new tables to be added without touching the core processing logic.
+- Streaming Joins and Watermarking: In the Silver layer, I combined the streaming ride data with bulk loads using an append flow. To handle late-arriving data and manage in-memory state, I applied Watermarking (e.g., a 3-minute delay) to the booking timestamps.
 
-4. Advanced Modeling: Gold Layer and SCDs
+3. Advanced Modeling: Gold Layer and SCDs
 In the Gold layer, I transformed the OBT into a robust Star Schema consisting of one Fact table and six Dimension tables (Passenger, Driver, Vehicle, Payment, Booking, and Location).
 - Slowly Changing Dimensions (SCD) Type 2: I implemented SCD Type 2 for the location dimension to maintain a complete history of updates (e.g., city name changes).
 - Spark Declarative Pipelines (SDP): I utilized the modern Auto-CDC API within SDP (formerly Delta Live Tables) to automate the complex logic of tracking historical changes using start_at and end_at timestamps.
 
-5. Processing Engine and Governance
+4. Processing Engine and Governance
 I leveraged Azure Databricks as the primary processing engine, using Unity Catalog to manage the three-level namespace (Catalog > Schema > Table) for better data governance
 . The final pipeline is fully orchestrated, utilizing incremental processing to ensure only new events are transformed, which optimizes both cost and performance
 
